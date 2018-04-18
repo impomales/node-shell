@@ -24,5 +24,44 @@ module.exports = {
 
     process.stdout.write(output);
     process.stdout.write('\nprompt > ');
+  },
+  cat: function(files) {
+    files.forEach(file => {
+      fs.readFile(file, (err, data) => {
+        if (err) throw err;
+        process.stdout.write(data);
+        process.stdout.write('\nprompt > ');
+      });
+    });
+  },
+  head: function(files) {
+    files.forEach(file => {
+      fs.readFile(file, (err, data) => {
+        if (err) throw err;
+        data = data
+          .toString()
+          .split('\n')
+          .slice(0, 6)
+          .join('\n');
+
+        process.stdout.write(data);
+        process.stdout.write('\nprompt > ');
+      });
+    });
+  },
+  tail: function(files) {
+    files.forEach(file => {
+      fs.readFile(file, (err, data) => {
+        if (err) throw err;
+        data = data
+          .toString()
+          .split('\n')
+          .slice(-6)
+          .join('\n');
+
+        process.stdout.write(data);
+        process.stdout.write('\nprompt > ');
+      });
+    });
   }
 };
