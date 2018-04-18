@@ -17,7 +17,10 @@ module.exports = {
     });
   },
   echo: function(arr) {
-    let output = arr.join(' ');
+    let output = arr.map(arg => {
+      if (arg[0] === '$') return process.env[arg.slice(1)];
+      return arg;
+    }).join(' ');
 
     process.stdout.write(output);
     process.stdout.write('\nprompt > ');
