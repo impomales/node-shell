@@ -12,9 +12,14 @@ module.exports = {
   ls: function() {
     fs.readdir('.', function(err, files) {
       if (err) throw err;
-      process.stdout.write('\n');
       files.forEach(file => process.stdout.write(file.toString() + '\n'));
       process.stdout.write('prompt > ');
     });
+  },
+  echo: function(arr) {
+    let output = arr.join(' ');
+
+    process.stdout.write(output);
+    process.stdout.write('\nprompt > ');
   }
 };
