@@ -63,5 +63,69 @@ module.exports = {
         process.stdout.write('\nprompt > ');
       });
     });
+  },
+  sort: function(files) {
+    files.forEach(file => {
+      fs.readFile(file, (err, data) => {
+        if (err) throw err;
+        data = data
+          .toString()
+          .split('\n')
+          .sort()
+          .join('\n');
+
+        process.stdout.write(data);
+        process.stdout.write('\nprompt > ');
+      });
+    });
+  },
+  wc: function(files) {
+    files.forEach(file => {
+      fs.readFile(file, (err, data) => {
+        if (err) throw err;
+        let newLines = data
+          .toString()
+          .split('\n')
+          .length;
+        newLines--;
+        newLines = newLines.toString();
+
+        let words = data
+          .toString()
+          .split('\n')
+          .map(line => line.split(' ').filter(l => l !== '').length)
+          .reduce((count, next) => count + next, 0)
+          .toString();
+
+        let bytes = data
+          .toString()
+          .split('')
+          .length
+          .toString();
+
+        process.stdout.write(`${newLines} ${words} ${bytes}`);
+        process.stdout.write('\nprompt > ');
+      });
+    });
+  },
+  uniq: function(files) {
+    files.forEach(file => {
+      fs.readFile(file, (err, data) => {
+        if (err) throw err;
+
+        data = data.toString().split('\n');
+
+        for (let i = 0; i < data.length; i++) {
+          if (i === 0 ) process.stdout.write(data[i] + '\n');
+          else {
+            let prev = data[i -1];
+            if (prev !== data[i]) process.stdout.write(data[i] + '\n');
+          }
+        };
+
+
+        process.stdout.write('\nprompt > ');
+      });
+    });
   }
 };
