@@ -1,40 +1,70 @@
+'use strict';
+
 const fs = require('fs');
+const request = require('request');
+
+function countData(data) {
+  let newLines = data
+          .split('\n')
+          .length;
+        newLines--;
+        newLines = newLines.toString();
+
+        let words = data
+          .split('\n')
+          .map(line => line.split(' ').filter(l => l !== '').length)
+          .reduce((count, next) => count + next, 0)
+          .toString();
+
+        let bytes = data
+          .split('')
+          .length
+          .toString();
+  return `${newLines} ${words} ${bytes}`;
+}
 
 module.exports = {
-  pwd: function () {
-    process.stdout.write(process.env.PWD);
-    process.stdout.write('\nprompt > ');
+  pwd: function (stdin, args, done) {
+    done(process.env.PWD);
   },
-  date: function() {
-    process.stdout.write((new Date()).toString());
-    process.stdout.write('\nprompt > ');
+  date: function(stdin, args, done) {
+    done((new Date()).toString());
   },
-  ls: function() {
+  ls: function(stdin, args, done) {
     fs.readdir('.', function(err, files) {
       if (err) throw err;
-      files.forEach(file => process.stdout.write(file.toString() + '\n'));
-      process.stdout.write('prompt > ');
+      let res = '';
+      files.forEach(file => res += file.toString() + '\n');
+      done(res);
     });
   },
-  echo: function(arr) {
+  echo: function(stdin, arr, done) {
     let output = arr.map(arg => {
       if (arg[0] === '$') return process.env[arg.slice(1)];
       return arg;
     }).join(' ');
 
-    process.stdout.write(output);
-    process.stdout.write('\nprompt > ');
+    done(output);
   },
-  cat: function(files) {
+  cat: function(stdin, files, done) {
+    if (files.length === 0 && stdin) {
+      done(stdin.join(' '));
+      // do something
+      return;
+    }
     files.forEach(file => {
       fs.readFile(file, (err, data) => {
         if (err) throw err;
-        process.stdout.write(data);
-        process.stdout.write('\nprompt > ');
+        done(data);
       });
     });
   },
-  head: function(files) {
+  head: function(stdin, files, done) {
+    if (files.length === 0 && stdin) {
+      done(stdin.join(' '));
+      // do something.
+      return;
+    }
     files.forEach(file => {
       fs.readFile(file, (err, data) => {
         if (err) throw err;
@@ -44,12 +74,16 @@ module.exports = {
           .slice(0, 6)
           .join('\n');
 
-        process.stdout.write(data);
-        process.stdout.write('\nprompt > ');
+        done(data);
       });
     });
   },
-  tail: function(files) {
+  tail: function(stdin, files, done) {
+    if (files.length === 0 && stdin) {
+      done(stdin.join(' '));
+      // do something.
+      return;
+    }
     files.forEach(file => {
       fs.readFile(file, (err, data) => {
         if (err) throw err;
@@ -59,12 +93,16 @@ module.exports = {
           .slice(-6)
           .join('\n');
 
-        process.stdout.write(data);
-        process.stdout.write('\nprompt > ');
+        done(data);
       });
     });
   },
-  sort: function(files) {
+  sort: function(stdin, files, done) {
+    if (files.length === 0 && stdin) {
+      let data = stdin.join(' ');
+      // do something.
+      return;
+    }
     files.forEach(file => {
       fs.readFile(file, (err, data) => {
         if (err) throw err;
@@ -74,57 +112,68 @@ module.exports = {
           .sort()
           .join('\n');
 
-        process.stdout.write(data);
-        process.stdout.write('\nprompt > ');
+        done(data);
       });
     });
   },
-  wc: function(files) {
+  wc: function(stdin, files, done) {
+    if (files.length === 0 && stdin) {
+      let data = stdin.join(' ');
+        done(countData(data));
+        return;
+    }
     files.forEach(file => {
       fs.readFile(file, (err, data) => {
         if (err) throw err;
-        let newLines = data
-          .toString()
-          .split('\n')
-          .length;
-        newLines--;
-        newLines = newLines.toString();
-
-        let words = data
-          .toString()
-          .split('\n')
-          .map(line => line.split(' ').filter(l => l !== '').length)
-          .reduce((count, next) => count + next, 0)
-          .toString();
-
-        let bytes = data
-          .toString()
-          .split('')
-          .length
-          .toString();
-
-        process.stdout.write(`${newLines} ${words} ${bytes}`);
-        process.stdout.write('\nprompt > ');
+        data = data.toString();
+        done(countData(data));
       });
     });
   },
-  uniq: function(files) {
+  uniq: function(stdin, files, done) {
+    if (files.length === 0 && stdin) {
+      stdin.join(' ');
+      // do something.
+      done()
+    }
     files.forEach(file => {
       fs.readFile(file, (err, data) => {
         if (err) throw err;
 
         data = data.toString().split('\n');
+        let res = '';
 
         for (let i = 0; i < data.length; i++) {
-          if (i === 0 ) process.stdout.write(data[i] + '\n');
+          if (i === 0 ) res += data[i] + '\n';
           else {
             let prev = data[i -1];
-            if (prev !== data[i]) process.stdout.write(data[i] + '\n');
+            if (prev !== data[i]) res += data[i] + '\n';
           }
-        };
+        }
 
-
-        process.stdout.write('\nprompt > ');
+        done(res);
+      });
+    });
+  },
+  curl: function(stdin, urls, done) {
+    urls.forEach(url => {
+      request(url, (err, resp, body) => {
+        if (err) throw err;
+        done(body.toString());
+      });
+    });
+  },
+  find: function(stdin, dirs, done) {
+    dirs.forEach(directory => {
+      fs.readdir(directory, (err, children) => {
+        if (err) throw err;
+        children.forEach(child => {
+          let path = directory + '/' + child;
+          fs.stat(path, (err, fileObj) => {
+            if (fileObj.isFile()) done(path);
+            else this.find([path], done);
+          });
+        });
       });
     });
   }

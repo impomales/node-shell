@@ -1,0 +1,23 @@
+{
+  "name": "node-shell",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bash.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/impomales/node-shell.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/impomales/node-shell/issues"
+  },
+  "homepage": "https://github.com/impomales/node-shell#readme",
+  "dependencies": {
+    "request": "^2.85.0"
+  }
+}
