@@ -5,23 +5,39 @@ const request = require('request');
 
 function countData(data) {
   let newLines = data
-          .split('\n')
-          .length;
-        newLines--;
-        newLines = newLines.toString();
+    .split('\n')
+    .length;
+  newLines--;
+  newLines = newLines.toString();
 
-        let words = data
-          .split('\n')
-          .map(line => line.split(' ').filter(l => l !== '').length)
-          .reduce((count, next) => count + next, 0)
-          .toString();
+  let words = data
+    .split('\n')
+    .map(line => line.split(' ').filter(l => l !== '').length)
+    .reduce((count, next) => count + next, 0)
+    .toString();
 
-        let bytes = data
-          .split('')
-          .length
-          .toString();
+  let bytes = data
+    .split('')
+    .length
+    .toString();
   return `${newLines} ${words} ${bytes}`;
 }
+
+function getUniq(data) {
+  let res = '';
+
+  for (let i = 0; i < data.length; i++) {
+    if (i === 0 ) res += data[i] + '\n';
+    else {
+      let prev = data[i -1];
+      if (prev !== data[i]) res += data[i] + '\n';
+    }
+  }
+
+  return res;
+}
+
+// needs refactoring
 
 module.exports = {
   pwd: function (stdin, args, done) {
@@ -48,8 +64,7 @@ module.exports = {
   },
   cat: function(stdin, files, done) {
     if (files.length === 0 && stdin) {
-      done(stdin.join(' '));
-      // do something
+      done(stdin);
       return;
     }
     files.forEach(file => {
@@ -61,8 +76,7 @@ module.exports = {
   },
   head: function(stdin, files, done) {
     if (files.length === 0 && stdin) {
-      done(stdin.join(' '));
-      // do something.
+      done(stdin.split('\n').slice(0, 6).join('\n'));
       return;
     }
     files.forEach(file => {
@@ -80,8 +94,7 @@ module.exports = {
   },
   tail: function(stdin, files, done) {
     if (files.length === 0 && stdin) {
-      done(stdin.join(' '));
-      // do something.
+      done(stdin.split('\n').slice(-6).join('\n'));
       return;
     }
     files.forEach(file => {
@@ -99,8 +112,7 @@ module.exports = {
   },
   sort: function(stdin, files, done) {
     if (files.length === 0 && stdin) {
-      let data = stdin.join(' ');
-      // do something.
+      done(stdin.split('\n').sort().join('\n'));
       return;
     }
     files.forEach(file => {
@@ -118,8 +130,7 @@ module.exports = {
   },
   wc: function(stdin, files, done) {
     if (files.length === 0 && stdin) {
-      let data = stdin.join(' ');
-        done(countData(data));
+        done(countData(stdin));
         return;
     }
     files.forEach(file => {
@@ -132,26 +143,15 @@ module.exports = {
   },
   uniq: function(stdin, files, done) {
     if (files.length === 0 && stdin) {
-      stdin.join(' ');
-      // do something.
-      done()
+      done(getUniq(stdin.split('\n')));
     }
     files.forEach(file => {
       fs.readFile(file, (err, data) => {
         if (err) throw err;
 
         data = data.toString().split('\n');
-        let res = '';
 
-        for (let i = 0; i < data.length; i++) {
-          if (i === 0 ) res += data[i] + '\n';
-          else {
-            let prev = data[i -1];
-            if (prev !== data[i]) res += data[i] + '\n';
-          }
-        }
-
-        done(res);
+        done(getUniq(data));
       });
     });
   },

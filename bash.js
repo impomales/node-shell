@@ -1,8 +1,9 @@
 'use strict';
 const commands = require('./commands');
 
-// econsole.log(process);
+// console.log(process);
 process.stdout.write('prompt > ');
+// event driven
 process.stdin.on('data', function(data) {
   let stdin = null;
 
@@ -13,7 +14,7 @@ process.stdin.on('data', function(data) {
       cmd = cmd.split(' ');
       let c = cmd[0];
       let params = cmd.slice(1);
-      if (stdin) stdin = stdin.toString().split(' ');
+      if (stdin) stdin = stdin.toString();
       if (commands[c]) commands[c](stdin, params, done);
       else {
         process.stderr.write('command not found: ' + c.toString())
@@ -36,18 +37,7 @@ process.stdin.on('data', function(data) {
   // }
 
   cmds = cmds.split(/\s*\|\s*/g);
-
-  let cmd = cmds.shift();
-
-  cmd = cmd.split(' ');
-  let c = cmd[0];
-  let params = cmd.slice(1);
-  if (stdin) stdin = stdin.split(' ');
-  if (commands[c]) commands[c](stdin, params, done);
-  else {
-    process.stderr.write('command not found: ' + c.toString())
-    process.stdout.write('\nprompt > ');
-  };
+  done(null);
 });
 
 // var startTime = new Date;
