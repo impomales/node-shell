@@ -70,7 +70,7 @@ module.exports = {
     files.forEach(file => {
       fs.readFile(file, (err, data) => {
         if (err) throw err;
-        done(data);
+        done(data.toString());
       });
     });
   },
@@ -86,7 +86,7 @@ module.exports = {
           .toString()
           .split('\n')
           .slice(0, 6)
-          .join('\n');
+          .join('\n') + '\n';
 
         done(data);
       });
@@ -171,10 +171,15 @@ module.exports = {
           let path = directory + '/' + child;
           fs.stat(path, (err, fileObj) => {
             if (fileObj.isFile()) done(path);
-            else this.find([path], done);
+            else this.find(stdin, [path], done);
           });
         });
       });
     });
+  },
+  grep: function(stdin, match, done) {
+    if (stdin) {
+      done(stdin.split('\n').filter(line => line.includes(match)).join('\n'));
+    }
   }
 };

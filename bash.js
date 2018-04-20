@@ -14,7 +14,6 @@ process.stdin.on('data', function(data) {
       cmd = cmd.split(' ');
       let c = cmd[0];
       let params = cmd.slice(1);
-      if (stdin) stdin = stdin.toString();
       if (commands[c]) commands[c](stdin, params, done);
       else {
         process.stderr.write('command not found: ' + c.toString())
